@@ -1,1 +1,17 @@
 AGENTS.md
+.DS_Store
+node_modules/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.p8
+*.jks
+*.mobileprovision
+credentials.json
+service-account*.json
+.superpowers/
+mobile/playwright-report/
+mobile/test-results/

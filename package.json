@@ -1,0 +1,11 @@
+{
+  "name": "spoty-x-workspace",
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix mobile start",
+    "web": "npm --prefix mobile run web",
+    "test": "npm --prefix mobile test",
+    "typecheck": "npm --prefix mobile run typecheck",
+    "build:web": "npm --prefix mobile run build:web"
+  }
+}

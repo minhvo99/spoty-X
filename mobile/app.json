@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Spoty-X",
+    "slug": "spoty-x",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.minhvo99.spotyx"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#080a09",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.minhvo99.spotyx"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single",
+      "name": "Spoty-X",
+      "shortName": "Spoty-X",
+      "description": "Th\u01b0 vi\u1ec7n Spotify c\u1ee7a b\u1ea1n, trong m\u1ed9t kh\u00f4ng gian ri\u00eang."
+    },
+    "plugins": [
+      "expo-web-browser",
+      "expo-secure-store",
+      "expo-image"
+    ],
+    "scheme": "spotyx",
+    "experiments": {
+      "baseUrl": "/spoty-X"
+    }
+  }
+}
