@@ -26,12 +26,20 @@
       "output": "single",
       "name": "Spoty-X",
       "shortName": "Spoty-X",
-      "description": "Th\u01b0 vi\u1ec7n Spotify c\u1ee7a b\u1ea1n, trong m\u1ed9t kh\u00f4ng gian ri\u00eang."
+      "description": "M\u1edf Spoty-X v\u00e0 nghe ngay. Nh\u1ea1c m\u1edf, nh\u1ea1c c\u1ee7a b\u1ea1n, kh\u00f4ng qu\u1ea3ng c\u00e1o v\u00e0 kh\u00f4ng c\u1ea7n API key."
     },
     "plugins": [
-      "expo-web-browser",
-      "expo-secure-store",
-      "expo-image"
+      "expo-image",
+      "expo-router",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": true,
+          "enableBackgroundRecording": false
+        }
+      ]
     ],
     "scheme": "spotyx",
     "experiments": {

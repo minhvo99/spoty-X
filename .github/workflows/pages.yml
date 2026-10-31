@@ -22,14 +22,16 @@ jobs:
       run:
         working-directory: mobile
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: mobile/package-lock.json
       - name: Install locked dependencies
         run: npm ci
+      - name: Lint
+        run: npm run lint
       - name: TypeScript
         run: npm run typecheck
       - name: Vitest unit and integration tests
@@ -37,8 +39,6 @@ jobs:
       - name: Build static web application
         run: npm run build:web
         env:
-          # A Spotify Client ID is public in a browser bundle. Never add a Client Secret.
-          EXPO_PUBLIC_SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
           CI: '1'
       - name: Install browser for Vitest UI tests
         run: npx playwright install --with-deps chromium
@@ -50,14 +50,14 @@ jobs:
           CI: '1'
       - name: Preserve screenshots when a browser test fails
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: browser-test-results
           path: mobile/test-results/
           if-no-files-found: ignore
       - name: Upload verified website
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: mobile/dist
 
@@ -74,7 +74,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6.0.0
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5.0.1

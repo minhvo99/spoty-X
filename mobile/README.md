@@ -1,18 +1,15 @@
-# Spoty-X mobile / web
+# Spoty-X native and web
 
-React Native + Expo. Xem [README gốc](../README.md) để cấu hình Spotify và GitHub Pages.
+Independent no-key music player; see the [root README](../README.md) for setup, music credits, CI/CD and evidence boundaries.
 
-```bash
-npm ci
-npm run web
-npm test
-npm run typecheck
-npm run build:web
-npx playwright install chromium
-npm run test:e2e
-npm run build:native:check
-```
+- `src/music/model.ts`: pure library/search/queue behavior, tested with Vitest.
+- `src/music/persistence.ts`: serialized durable state and import validation.
+- `src/music/transport.ts`: guarded transport commands, volume and EOF replay.
+- `src/music/storage.web.ts`: localStorage metadata and IndexedDB audio blobs.
+- `src/music/storage.ts`: AsyncStorage and copied document audio on native.
+- `src/music/provider.tsx`: actual expo-audio lifecycle and application state.
+- `src/app/`: Expo Router root route and layout.
+- `src/screens/`, `src/components/`: responsive original UI.
+- `tests/`: Vitest browser tests driven by Playwright against actual exported audio.
 
-`src/spotify/core.ts` chứa OAuth/API không phụ thuộc giao diện. Các file `.web.ts` dành cho sessionStorage, callback web và Spotify Web Playback SDK; file tương ứng không có hậu tố dùng SecureStore và trình duyệt hệ thống trên native. `src/app.tsx` dùng React Native cho cả ba nền tảng.
-
-Test Vitest bao gồm unit test trong `src/spotify` và test trình duyệt trong `tests`; test trình duyệt cần export `dist/` trước. Không commit `.env`, token, khóa hoặc output build/test.
+No API key, environment file or account is needed. Imported audio remains local. Source audio attribution is in `assets/audio/ATTRIBUTION.md`.

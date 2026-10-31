@@ -6,6 +6,9 @@
     "web": "npm --prefix mobile run web",
     "test": "npm --prefix mobile test",
     "typecheck": "npm --prefix mobile run typecheck",
-    "build:web": "npm --prefix mobile run build:web"
+    "build:web": "npm --prefix mobile run build:web",
+    "lint": "npm --prefix mobile run lint",
+    "test:e2e": "npm --prefix mobile run test:e2e",
+    "build:native:check": "npm --prefix mobile run build:native:check"
   }
 }
