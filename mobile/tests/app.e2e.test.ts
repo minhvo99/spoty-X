@@ -86,6 +86,7 @@ describe('Published React Native Web app', () => {
     await page.getByRole('button', { name: 'Mở playlist Playlist của tôi' }).click();
     await page.getByRole('button', { name: /Phát Bài hát thử nghiệm/ }).click();
     await page.getByRole('button', { name: 'Tạm dừng', exact: true }).waitFor();
+    await page.getByRole('button', { name: 'Bài trước', exact: true }).waitFor();
     expect(mutations.some(m => m.url.includes('/play?device_id=fixture-web') && JSON.stringify(m.body).includes(track.uri) && JSON.stringify(m.body).includes('spotify:playlist:test-playlist'))).toBe(true);
     await page.screenshot({ path: 'test-results/phone-player.png', fullPage: true });
     await page.getByRole('button', { name: 'Tài khoản', exact: true }).click();
@@ -117,6 +118,19 @@ describe('Published React Native Web app', () => {
     await page.getByRole('textbox', { name: 'Tìm bài hát trên Spotify' }).fill('new');
     await page.getByRole('button', { name: /Phát New result/ }).waitFor(); release();
     await page.waitForTimeout(100); expect(await page.getByRole('button', { name: /Phát Old result/ }).count()).toBe(0); await page.close();
+  });
+  test('invalid refresh returns to login and clears account/player UI', async () => {
+    const { page } = await connectedPage();
+    await page.addInitScript(() => {
+      sessionStorage.setItem('spotyx.tokens', JSON.stringify({ access_token: 'expired-fixture', refresh_token: 'revoked-fixture', expiresAt: 0 }));
+    });
+    await page.route('https://accounts.spotify.com/api/token', route => route.fulfill({ status: 400, json: { error: 'invalid_grant' } }));
+    await page.goto(base);
+    await page.getByRole('button', { name: 'Đăng nhập Spotify', exact: true }).waitFor();
+    expect(await page.getByRole('textbox', { name: 'Spotify Client ID công khai' }).isEditable()).toBe(true);
+    expect(await page.evaluate(() => sessionStorage.getItem('spotyx.tokens'))).toBe(null);
+    expect(await page.getByRole('button', { name: 'Tạm dừng', exact: true }).count()).toBe(0);
+    await page.close();
   });
   test('invalid OAuth callback is rejected and removed from browser address', async () => {
     const page = await browser.newPage(); let exchanges = 0;

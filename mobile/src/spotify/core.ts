@@ -25,9 +25,18 @@ export class SpotifyClient {
   private refreshing: Promise<string> | null = null;
   private generation = 0;
   private exchanging = false;
+  private sessionListeners = new Set<(connected: boolean) => void>();
   private cooldownUntil = 0;
   constructor(store: Store, crypt: CryptoTools, fetcher: typeof fetch = fetch) { this.store = store; this.crypt = crypt; this.fetcher = (input, init) => fetcher(input, init); }
-  async hasSession() { return Boolean(await this.store.get('tokens')); }
+  subscribeSession(listener: (connected: boolean) => void) {
+    this.sessionListeners.add(listener);
+    return () => { this.sessionListeners.delete(listener); };
+  }
+  async hasSession() {
+    const generation = this.generation;
+    const raw = await this.store.get('tokens');
+    return generation === this.generation && Boolean(raw);
+  }
   async clientId() { return (await this.store.get('clientId')) ?? ''; }
   async loginUrl(clientId: string, redirectUri: string): Promise<string> {
     if (!/^[a-f0-9]{32}$/i.test(clientId.trim())) throw new SpotifyError('Client ID phải gồm 32 ký tự, lấy từ Spotify Developer Dashboard.');
@@ -47,7 +56,9 @@ export class SpotifyClient {
     finally { this.exchanging = false; }
   }
   private async completeCallback(params: URLSearchParams, redirectUri: string): Promise<void> {
+    const generation = this.generation;
     const raw = await this.store.get('pending');
+    if (generation !== this.generation) throw reconnect();
     const pending: Pending | null = raw ? JSON.parse(raw) : null;
     if (!pending || !params.get('state') || pending.state !== params.get('state') || pending.redirectUri !== redirectUri || Date.now() - pending.createdAt > 600000) {
       throw new SpotifyError('Không xác minh được phiên đăng nhập. Vui lòng kết nối Spotify lại.');
@@ -57,7 +68,7 @@ export class SpotifyClient {
     if (params.has('error')) throw new SpotifyError('Bạn chưa cho phép kết nối Spotify. Có thể thử đăng nhập lại.');
     const code = params.get('code');
     if (!code) throw new SpotifyError('Spotify không trả về mã đăng nhập. Vui lòng thử lại.');
-    const generation = this.generation;
+    if (generation !== this.generation) throw reconnect();
     const response = await this.fetcher(tokenEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri, client_id: pending.clientId, code_verifier: pending.verifier }).toString() });
     if (!response.ok) throw new SpotifyError('Không đổi được mã đăng nhập. Kiểm tra Client ID và Redirect URI rồi kết nối lại.', response.status);
     await this.saveTokens(await response.json(), undefined, generation);
@@ -69,18 +80,20 @@ export class SpotifyClient {
     await this.store.set('tokens', JSON.stringify(tokens));
     // Native secure storage is asynchronous; logout can happen while persisting.
     if (generation !== this.generation) { await this.store.remove('tokens'); throw reconnect(); }
+    this.sessionListeners.forEach(listener => listener(true));
     return tokens.access_token;
   }
   async token(force = false): Promise<string> {
+    const generation = this.generation;
     const raw = await this.store.get('tokens');
+    if (generation !== this.generation) throw reconnect();
     if (!raw) throw reconnect();
     const tokens: Tokens = JSON.parse(raw);
     if (!force && tokens.expiresAt > Date.now() + 60000) return tokens.access_token;
     if (this.refreshing) return this.refreshing;
-    const generation = this.generation;
     const promise = (async () => {
       const clientId = await this.clientId();
-      if (!clientId || !tokens.refresh_token) throw reconnect();
+      if (!clientId || !tokens.refresh_token || generation !== this.generation) throw reconnect();
       const response = await this.fetcher(tokenEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: tokens.refresh_token, client_id: clientId }).toString() });
       if (!response.ok) {
         if (response.status === 400 || response.status === 401) { if (generation === this.generation) await this.logout(); throw reconnect(); }
@@ -93,6 +106,7 @@ export class SpotifyClient {
   }
   async logout(): Promise<void> {
     this.generation++; this.refreshing = null; this.cooldownUntil = 0;
+    this.sessionListeners.forEach(listener => listener(false));
     await Promise.all([this.store.remove('tokens'), this.store.remove('pending')]);
   }
   async request<T>(path: string, init: RequestInit = {}): Promise<T> {

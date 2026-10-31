@@ -14,7 +14,7 @@ export function PlayerBar({ player, compact, onDevices }: { player: ReturnType<t
       <View style={{ flex: compact ? undefined : 1.5, alignItems: 'center', gap: 6 }}>
         <View style={{ flexDirection: 'row', gap: compact ? 0 : 6, alignItems: 'center' }}>
           {!compact && <IconButton name="shuffle" label="Bật/tắt phát ngẫu nhiên" disabled={disabled || disallowed.toggling_shuffle} active={state?.shuffle_state} onPress={() => void player.command('/me/player/shuffle?state=' + !state?.shuffle_state)} />}
-          {!compact && <IconButton name="previous" label="Bài trước" disabled={disabled || disallowed.skipping_prev} onPress={() => void player.command('/me/player/previous', 'POST')} />}
+          <IconButton name="previous" label="Bài trước" disabled={disabled || disallowed.skipping_prev} onPress={() => void player.command('/me/player/previous', 'POST')} />
           <IconButton large name={state?.is_playing ? 'pause' : 'play'} label={state?.is_playing ? 'Tạm dừng' : 'Phát tiếp'} disabled={disabled || (state?.is_playing ? disallowed.pausing : disallowed.resuming)} onPress={() => void player.command(state?.is_playing ? '/me/player/pause' : '/me/player/play')} />
           <IconButton name="next" label="Bài tiếp theo" disabled={disabled || disallowed.skipping_next} onPress={() => void player.command('/me/player/next', 'POST')} />
           {!compact && <IconButton name="repeat" label="Chuyển chế độ lặp lại" disabled={disabled || disallowed.toggling_repeat_context} active={state?.repeat_state !== undefined && state.repeat_state !== 'off'} onPress={() => void player.command('/me/player/repeat?state=' + (state?.repeat_state === 'off' ? 'context' : state?.repeat_state === 'context' ? 'track' : 'off'))} />}

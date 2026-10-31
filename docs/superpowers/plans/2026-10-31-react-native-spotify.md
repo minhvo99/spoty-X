@@ -41,7 +41,7 @@
 - [x] Implement library pagination, playlist items pagination, search, track playback and device selection.
 - [x] Implement native active-device control and web SDK lifecycle/cleanup, real progress, keyboard accessible controls.
 - [x] Typecheck, run suite, export web and native JS bundles; inspect desktop/mobile screenshots.
-- [ ] Commit application.
+- [x] Commit application.
 
 ### Task 3: Publication and documentation
 
@@ -49,7 +49,7 @@
 
 - [x] Disable legacy automation for this fork; add npm CI/test/typecheck/export and official Pages deployment workflow.
 - [x] Document setup, redirect URI, Premium restrictions, testing limits and deployment.
-- [ ] Fresh independent whole-change review; resolve important findings with regression tests.
+- [x] Fresh independent whole-change review; resolve important findings with regression tests.
 - [ ] Run final checks, commit, push origin, enable Pages Actions and verify completed deployment/public URL.
 - [ ] Report URL plus outstanding account/Client ID verification honestly.
 
@@ -69,3 +69,9 @@ Palette: canvas #080a09, panels #121613, raised #202721, text #f2f5ed, muted #9c
 - Ruling: user explicitly requires Vitest; both unit and browser tests run under Vitest, Playwright only provides browser automation.
 - Ruling: no credentials were supplied, so no placeholder GitHub Secret is created. Workflow reads optional SPOTIFY_CLIENT_ID; UI supports entering this public ID at runtime. Sensitive client secret is unnecessary for PKCE.
 - Ruling: override transitive glob/minimatch to patched versions; npm audit now reports zero vulnerabilities, and rebuilt web/native bundles verify compatibility.
+
+- Final review: independent fresh reviewer found 3 actionable issues; no deferred minors.
+- Final fixed P1: delayed native token/pending-auth reads spanning logout are rejected before refreshing/exchanging. Three delayed-storage regressions observed RED then GREEN.
+- Final fixed P2: session invalidation is published to React; account, player and cached view are cleared, and login is reachable. Invalid-grant Vitest browser regression RED then GREEN.
+- Final fixed P2: previous-track action is now reachable on phones. Mobile browser regression RED then GREEN.
+- Final suite before publication: 19 core/data Vitest tests and 7 browser Vitest tests green; live OAuth and audio still require the user's Spotify configuration.

@@ -7,7 +7,7 @@ function setup(fetcher: typeof fetch = async () => Response.json({})) {
   const data = new Map<string, string>();
   const store: Store = { get: async k => data.get(k) ?? null, set: async (k, v) => { data.set(k, v); }, remove: async k => { data.delete(k); } };
   const client = new SpotifyClient(store, { random: () => crypto.randomUUID().replaceAll('-', ''), challenge: pkceChallenge }, fetcher);
-  return { client, data };
+  return { client, data, store };
 }
 const saved = (expiresAt = Date.now() + 3600000) => JSON.stringify({ access_token: 'old', refresh_token: 'refresh', expiresAt });
 
@@ -100,4 +100,40 @@ test('simultaneous copies of an OAuth callback exchange the code only once', asy
   const results = await Promise.allSettled([client.acceptCallback(params, 'https://example.com/'), client.acceptCallback(params, 'https://example.com/')]);
   assert.equal(results.filter(r => r.status === 'fulfilled').length, 1);
   assert.equal(exchanges, 1);
+});
+
+// SecureStore reads are asynchronous on native: reproduce reads spanning logout.
+async function pauseRead(store: Store, key: string) {
+  const original = store.get;
+  let release!: () => void;
+  let entered!: () => void;
+  const ready = new Promise<void>(resolve => { entered = resolve; });
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let paused = false;
+  store.get = async k => {
+    const value = await original(k);
+    if (k === key && !paused) { paused = true; entered(); await gate; }
+    return value;
+  };
+  return { ready, release };
+}
+test.each([0, 3600000])('logout invalidates a token read already in flight (expiry offset %i)', async offset => {
+  let refreshes = 0;
+  const { client, data, store } = setup(async () => { refreshes++; return Response.json({ access_token: 'new', expires_in: 3600 }); });
+  data.set('tokens', saved(offset ? Date.now() + offset : 0)); data.set('clientId', 'a'.repeat(32));
+  const gate = await pauseRead(store, 'tokens');
+  const pending = client.token(); await gate.ready;
+  await client.logout(); gate.release();
+  await assert.rejects(pending, /đăng nhập/);
+  assert.equal(refreshes, 0); assert.equal(data.has('tokens'), false);
+});
+test('logout invalidates a callback whose pending-auth read was already in flight', async () => {
+  let exchanges = 0;
+  const { client, data, store } = setup(async () => { exchanges++; return Response.json({ access_token: 'new', refresh_token: 'r', expires_in: 3600 }); });
+  const url = new URL(await client.loginUrl('a'.repeat(32), 'https://example.com/'));
+  const gate = await pauseRead(store, 'pending');
+  const pending = client.acceptCallback(new URLSearchParams({ code: 'code', state: url.searchParams.get('state')! }), 'https://example.com/');
+  await gate.ready; await client.logout(); gate.release();
+  await assert.rejects(pending, /đăng nhập/);
+  assert.equal(exchanges, 0); assert.equal(data.has('tokens'), false);
 });

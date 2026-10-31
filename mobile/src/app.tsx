@@ -66,6 +66,10 @@ function Workspace() {
     bootstrap().then(result => { if (active) { setClientId(result.clientId); setConnected(result.connected); setError(result.error); if (result.error) setScreen('account'); } }).catch(e => { if (active) setError(e.message); }).finally(() => { if (active) setBooting(false); });
     return () => { active = false; };
   }, []);
+  useEffect(() => client.subscribeSession(value => {
+    setConnected(value);
+    if (!value) { setProfile(null); setSelected(null); setQuery(''); setSearch(''); setSearchResult(null); setScreen('account'); }
+  }), []);
   useEffect(() => {
     let active = true;
     if (!connected) { setProfile(null); return; }
