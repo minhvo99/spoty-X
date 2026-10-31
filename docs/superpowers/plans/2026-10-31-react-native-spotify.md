@@ -27,28 +27,28 @@
 **Files:** `mobile/package.json`, `mobile/app.json`, `mobile/src/spotify/{core.ts,core.test.ts,storage.ts,storage.web.ts,auth.ts,auth.web.ts,types.ts}`.
 **Interfaces:** `SpotifyClient(storage, fetcher)` exposes `request<T>(path, init?)`, `acceptCallback(params, redirectUri)`, `loginUrl(clientId, redirectUri)`, `logout()`, `token()`; async storage get/set/remove.
 
-- [ ] Scaffold `create-expo-app` blank TypeScript; configure web base URL and native identity.
-- [ ] Write/run failing tests for PKCE RFC vector, state mismatch/replay, refresh preservation/single flight, 401 retry and 429 cooldown.
-- [ ] Implement core and adapters; run full tests and typecheck.
-- [ ] Commit tested core.
+- [x] Scaffold `create-expo-app` blank TypeScript; configure web base URL and native identity.
+- [x] Write/run failing tests for PKCE RFC vector, state mismatch/replay, refresh preservation/single flight, 401 retry and 429 cooldown.
+- [x] Implement core and adapters; run full tests and typecheck.
+- [x] Commit tested core.
 
 ### Task 2: Responsive client and playback
 
 **Files:** `mobile/src/{app.tsx,theme.ts}`, `mobile/src/components/*`, `mobile/src/spotify/{playback.ts,playback.web.ts,use-spotify.ts}` and `mobile/App.tsx`.
 **Interfaces:** Shared typed tracks/playlists/player state; platform player connect/disconnect, Web SDK supplies device ID; UI calls core requests and real player state.
 
-- [ ] Create shared navigation state and onboarding configuration with public Client ID; test empty, error and connected flows in browser using isolated network fixtures.
-- [ ] Implement library pagination, playlist items pagination, search, track playback and device selection.
-- [ ] Implement native active-device control and web SDK lifecycle/cleanup, real progress, keyboard accessible controls.
-- [ ] Typecheck, run suite, export web and native JS bundles; inspect desktop/mobile screenshots.
+- [x] Create shared navigation state and onboarding configuration with public Client ID; test empty, error and connected flows in browser using isolated network fixtures.
+- [x] Implement library pagination, playlist items pagination, search, track playback and device selection.
+- [x] Implement native active-device control and web SDK lifecycle/cleanup, real progress, keyboard accessible controls.
+- [x] Typecheck, run suite, export web and native JS bundles; inspect desktop/mobile screenshots.
 - [ ] Commit application.
 
 ### Task 3: Publication and documentation
 
 **Files:** `.github/workflows/pages.yml`, `README.md`, `mobile/README.md`, `.gitignore`.
 
-- [ ] Disable legacy automation for this fork; add npm CI/test/typecheck/export and official Pages deployment workflow.
-- [ ] Document setup, redirect URI, Premium restrictions, testing limits and deployment.
+- [x] Disable legacy automation for this fork; add npm CI/test/typecheck/export and official Pages deployment workflow.
+- [x] Document setup, redirect URI, Premium restrictions, testing limits and deployment.
 - [ ] Fresh independent whole-change review; resolve important findings with regression tests.
 - [ ] Run final checks, commit, push origin, enable Pages Actions and verify completed deployment/public URL.
 - [ ] Report URL plus outstanding account/Client ID verification honestly.
@@ -62,3 +62,10 @@ Palette: canvas #080a09, panels #121613, raised #202721, text #f2f5ed, muted #9c
 - Initial: clean checkout before design documents; existing branch main, dedicated user target empty.
 - Ruling: reuse current checkout as user authorized all repo work; create codex implementation branch, publish main to empty target after verification.
 - Ruling: blank TypeScript Expo shell with local tabs avoids unnecessary router deep links on Pages; actual Spotify callback remains at root.
+
+- Task 1: complete. Core scaffold committed 19e13d5. Vitest currently 16/16 green, TypeScript passes. Callback concurrency and browser-fetch receiver regressions proved RED then GREEN.
+- Task 2: browser flows 6/6 green (Vitest + Playwright driver), iOS/Android JS exports green. Images reviewed at 390x844 and 1440x1000. No live Spotify account credentials provided; real OAuth/audio remains unverified.
+- Task 3: CI/CD and README prepared. Repo is public, GitHub has no repository secrets yet. Pending independent review, final verification, publication.
+- Ruling: user explicitly requires Vitest; both unit and browser tests run under Vitest, Playwright only provides browser automation.
+- Ruling: no credentials were supplied, so no placeholder GitHub Secret is created. Workflow reads optional SPOTIFY_CLIENT_ID; UI supports entering this public ID at runtime. Sensitive client secret is unnecessary for PKCE.
+- Ruling: override transitive glob/minimatch to patched versions; npm audit now reports zero vulnerabilities, and rebuilt web/native bundles verify compatibility.

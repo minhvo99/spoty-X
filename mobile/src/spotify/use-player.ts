@@ -70,6 +70,6 @@ export function usePlayer(connected: boolean, reportError: (error: string) => vo
     } catch (e) { if (mounted.current && connectedRef.current) report.current((e as Error).message); }
     finally { actionLock.current = false; if (mounted.current) setBusy(false); }
   }, [deviceId, webDeviceId, playback?.device?.id, refresh]);
-  const play = (track: Track) => command('/me/player/play', 'PUT', { uris: [track.uri] });
+  const play = (track: Track, contextUri?: string) => command('/me/player/play', 'PUT', contextUri ? { context_uri: contextUri, offset: { uri: track.uri } } : { uris: [track.uri] });
   return { playback, busy, play, command, devices, deviceId, webDeviceId, setDeviceId, refreshDevices, refresh, reconnect: () => setRevision(n => n + 1) };
 }

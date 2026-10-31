@@ -18,7 +18,7 @@ export function Cover({ uri, size = 56 }: { uri?: string; size?: number }) {
   return uri ? <Image source={{ uri }} style={{ width: size, height: size, borderRadius: 6, backgroundColor: colors.raised }} contentFit="cover" accessibilityLabel="Ảnh bìa Spotify" /> : <View style={{ width: size, height: size, borderRadius: 6, backgroundColor: colors.raised, alignItems: 'center', justifyContent: 'center' }}><Icon name="music" size={Math.max(22, size / 3)} /></View>;
 }
 export function Empty({ title, body, children }: { title: string; body: string; children?: ReactNode }) {
-  return <View style={{ paddingVertical: 48, gap: 16, alignItems: 'flex-start', maxWidth: 560 }}><Icon name="music" size={40} color={colors.green} /><Text style={s.heading}>{title}</Text><Text style={s.body}>{body}</Text>{children}</View>;
+  return <View style={{ paddingVertical: 48, gap: 16, alignItems: 'flex-start', maxWidth: 560 }}><Icon name="music" size={40} color={colors.green} /><Text accessibilityRole="header" style={s.heading}>{title}</Text><Text style={s.body}>{body}</Text>{children}</View>;
 }
 export function Loading() { return <View style={{ padding: 30 }}><ActivityIndicator color={colors.green} accessibilityLabel="Đang tải Spotify" /></View>; }
 export const s = StyleSheet.create({

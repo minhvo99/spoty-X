@@ -1,0 +1,80 @@
+name: CI and GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Vitest, types, web and native bundles
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Vitest unit and integration tests
+        run: npm test
+      - name: Build static web application
+        run: npm run build:web
+        env:
+          # A Spotify Client ID is public in a browser bundle. Never add a Client Secret.
+          EXPO_PUBLIC_SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          CI: '1'
+      - name: Install browser for Vitest UI tests
+        run: npx playwright install --with-deps chromium
+      - name: Vitest browser flows (desktop and phone)
+        run: npm run test:e2e
+      - name: Verify Android and iOS JavaScript bundles
+        run: npm run build:native:check
+        env:
+          CI: '1'
+      - name: Preserve screenshots when a browser test fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-test-results
+          path: mobile/test-results/
+          if-no-files-found: ignore
+      - name: Upload verified website
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: mobile/dist
+
+  deploy:
+    name: Deploy verified web application
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

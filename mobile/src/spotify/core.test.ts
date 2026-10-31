@@ -84,3 +84,20 @@ test('invalid grant clears expired session and prompts reconnect', async () => {
   data.set('tokens', saved(0)); data.set('clientId', 'a'.repeat(32));
   await assert.rejects(client.token(), /đăng nhập/); assert.equal(data.has('tokens'), false);
 });
+test('calls browser fetch without binding it to SpotifyClient', async () => {
+  const { client, data } = setup(async function (this: unknown) {
+    assert.equal(this, undefined, 'Browser fetch rejects a SpotifyClient receiver');
+    return Response.json({ id: 'me' });
+  });
+  data.set('tokens', saved());
+  assert.deepEqual(await client.request('/me'), { id: 'me' });
+});
+test('simultaneous copies of an OAuth callback exchange the code only once', async () => {
+  let exchanges = 0;
+  const { client } = setup(async () => { exchanges++; return Response.json({ access_token: 'new', refresh_token: 'r', expires_in: 3600 }); });
+  const url = new URL(await client.loginUrl('a'.repeat(32), 'https://example.com/'));
+  const params = new URLSearchParams({ code: 'code', state: url.searchParams.get('state')! });
+  const results = await Promise.allSettled([client.acceptCallback(params, 'https://example.com/'), client.acceptCallback(params, 'https://example.com/')]);
+  assert.equal(results.filter(r => r.status === 'fulfilled').length, 1);
+  assert.equal(exchanges, 1);
+});

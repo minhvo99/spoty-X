@@ -33,8 +33,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "build:web": "expo export --platform web"
+    "build:web": "expo export --platform web && node scripts/post-export.mjs",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "build:native:check": "expo export --platform ios --platform android --output-dir dist-native"
   },
   "private": true,
-  "type": "module"
+  "type": "module",
+  "overrides": {
+    "glob": "^14.0.3",
+    "minimatch": "^11.0.3"
+  }
 }

@@ -25,7 +25,7 @@ function bootstrap() {
   if (!bootPromise) bootPromise = (async () => {
     let error = '';
     try { await finishLogin(); } catch (e) { error = (e as Error).message; }
-    return { clientId: process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_ID ?? await client.clientId(), connected: await client.hasSession(), error };
+    return { clientId: process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_ID || await client.clientId(), connected: await client.hasSession(), error };
   })();
   return bootPromise;
 }
@@ -74,7 +74,7 @@ function Workspace() {
   }, [connected]);
   useEffect(() => {
     setSearchResult(null); setSearchError('');
-    if (!connected || !query.trim() || screen !== 'search') { setSearchLoading(false); return; }
+    if (!connected || !query.trim() || screen !== 'search') { setSearchLoading(false); if (!query.trim()) setSearch(''); return; }
     setSearchLoading(true);
     const timer = setTimeout(() => setSearch(query.trim()), 400);
     return () => clearTimeout(timer);
@@ -132,7 +132,7 @@ function Workspace() {
   </View>;
 
   const renderDisconnected = () => <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: compact ? 22 : 44, gap: 40 }}>
-    <View style={{ flexDirection: compact ? 'column-reverse' : 'row', gap: compact ? 28 : 40, alignItems: compact ? 'flex-start' : 'center', paddingVertical: compact ? 8 : 24 }}>
+    <View style={{ flexDirection: compact ? 'column' : 'row', gap: compact ? 28 : 40, alignItems: compact ? 'flex-start' : 'center', paddingVertical: compact ? 8 : 24 }}>
       <View style={{ flex: 1, gap: 22 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.green }} /><Text style={s.caption}>Một không gian dành riêng cho âm nhạc</Text></View>
         <Text accessibilityRole="header" style={{ fontSize: compact ? 40 : 58, lineHeight: compact ? 46 : 64, fontWeight: '900', letterSpacing: -2, color: colors.text }}>Nhạc của bạn.{ '\n' }Không gian{ '\n' }của bạn.</Text>
@@ -160,7 +160,7 @@ function Workspace() {
   };
   const renderTracks = () => <FlatList data={tracks} keyExtractor={(track, i) => `${track.id}-${i}`} contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: compact ? 20 : 36 }}
     ListHeaderComponent={<View style={{ gap: 24, paddingBottom: 28 }}><Button small icon="arrow" onPress={() => setSelected(null)}>Thư viện</Button><View style={{ flexDirection: compact ? 'column' : 'row', gap: 24, alignItems: compact ? 'flex-start' : 'flex-end' }}><Cover uri={selected?.images?.[0]?.url} size={compact ? 150 : 200} /><View style={{ flex: 1, gap: 14 }}><Text style={s.caption}>Playlist từ Spotify</Text><Text accessibilityRole="header" style={[s.heading, { fontSize: compact ? 32 : 44 }]}>{selected?.name}</Text><Text style={s.body}>{selected?.owner?.display_name || 'Spotify'}</Text><ContentLink url={selected?.external_urls?.spotify} /></View></View><Text style={s.caption}>Bài hát · Nghệ sĩ{!compact && '                                      Album                                     Thời lượng'}</Text></View>}
-    renderItem={({ item, index }) => <TrackRow track={item} index={index} compact={compact} active={player.playback?.item?.uri === item.uri} onPlay={() => void player.play(item)} />}
+    renderItem={({ item, index }) => <TrackRow track={item} index={index} compact={compact} active={player.playback?.item?.uri === item.uri} onPlay={() => void player.play(item, selected?.uri)} />}
     ListEmptyComponent={playlist.loading ? <Loading /> : playlist.error ? <View /> : <Empty title="Chưa có bài hát khả dụng" body="Playlist có thể đang trống hoặc nội dung không được Spotify API cung cấp. Với Development Mode, chỉ đọc được playlist bạn sở hữu hoặc cộng tác." />}
     ListFooterComponent={<PageFooter loading={playlist.loading && tracks.length > 0} error={playlist.error} hasNext={Boolean(playlist.next)} retry={playlist.retry} more={playlist.loadMore} />}
   />;

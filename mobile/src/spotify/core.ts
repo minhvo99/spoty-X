@@ -24,8 +24,9 @@ export class SpotifyClient {
   private fetcher: typeof fetch;
   private refreshing: Promise<string> | null = null;
   private generation = 0;
+  private exchanging = false;
   private cooldownUntil = 0;
-  constructor(store: Store, crypt: CryptoTools, fetcher: typeof fetch = fetch) { this.store = store; this.crypt = crypt; this.fetcher = fetcher; }
+  constructor(store: Store, crypt: CryptoTools, fetcher: typeof fetch = fetch) { this.store = store; this.crypt = crypt; this.fetcher = (input, init) => fetcher(input, init); }
   async hasSession() { return Boolean(await this.store.get('tokens')); }
   async clientId() { return (await this.store.get('clientId')) ?? ''; }
   async loginUrl(clientId: string, redirectUri: string): Promise<string> {
@@ -40,6 +41,12 @@ export class SpotifyClient {
     return 'https://accounts.spotify.com/authorize?' + new URLSearchParams({ client_id: clientId.trim(), response_type: 'code', redirect_uri: redirectUri, scope: scopes.join(' '), state, code_challenge_method: 'S256', code_challenge: challenge });
   }
   async acceptCallback(params: URLSearchParams, redirectUri: string): Promise<void> {
+    if (this.exchanging) throw new SpotifyError('Phiên đăng nhập này đang được xử lý.');
+    this.exchanging = true;
+    try { await this.completeCallback(params, redirectUri); }
+    finally { this.exchanging = false; }
+  }
+  private async completeCallback(params: URLSearchParams, redirectUri: string): Promise<void> {
     const raw = await this.store.get('pending');
     const pending: Pending | null = raw ? JSON.parse(raw) : null;
     if (!pending || !params.get('state') || pending.state !== params.get('state') || pending.redirectUri !== redirectUri || Date.now() - pending.createdAt > 600000) {

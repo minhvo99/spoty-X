@@ -1,192 +1,100 @@
-<p align="center">
-  <a href="https://github.com/SpotX-Official/SpotX/releases"><img src=".github/Pic/logo.png" /></a>
-</p>
+# Spoty-X
 
-<p align="center">
-  <a href="https://t.me/spotify_windows_mod"><img src="https://spotx-official.github.io/images/shields/SpotX_Channel.svg"></a>
-  <a href="https://t.me/SpotxCommunity"><img src="https://spotx-official.github.io/images/shields/SpotX_Community.svg"></a>
-  <a href="https://github.com/SpotX-Official/SpotX-Bash"><img src="https://spotx-official.github.io/images/shields/SpotX_for_Mac&Linux.svg"></a>
-  <a href="https://telegra.ph/SpotX-FAQ-09-19"><img src="https://spotx-official.github.io/images/shields/faq.svg"></a>
-</p>
+Ứng dụng **React Native + Expo + TypeScript** kết nối tài khoản Spotify, có giao diện tiếng Việt cho điện thoại và web. Không tích hợp quảng cáo, SDK quảng cáo hoặc analytics riêng.
 
-<h2> 
-  <div align="center">
-    <b>Patcher for Spotify Desktop Client on Windows </b>
-  </div> 
-</h2>
+**Website:** https://minhvo99.github.io/spoty-X/
 
-<p align="center"> •
-  <a href="#requirements">Requirements</a> •
-  <a href="#features">Features</a> •
-  <a href="#installation--update">Installation</a> •
-  <a href="#uninstall">Uninstall</a> •
-  <a href="#faq">FAQ</a> •
-  <a href="#disclaimer">Disclaimer</a>
-</p>
+## Những gì ứng dụng làm được
 
-<h1 id="requirements">Requirements</h1>
+- Đăng nhập Spotify qua OAuth Authorization Code + PKCE, không dùng Client Secret.
+- Đọc và phân trang playlist, xem bài hát theo định dạng Spotify API năm 2026.
+- Tìm bài hát theo tên/nghệ sĩ, phát, tạm dừng, chuyển bài, tua 15 giây, shuffle và repeat khi Spotify cho phép.
+- Web dùng Spotify Web Playback SDK. Bản native điều khiển thiết bị Spotify đang hoạt động qua Web API.
+- Có trạng thái tải, danh sách trống, thử lại khi lỗi, xử lý refresh token và giới hạn yêu cầu API.
 
-- **OS:** Windows 7-11
-- **Spotify:** [Official desktop version](https://loadspot.vercel.app/) (Microsoft Store version is not suitable)
-- **PowerShell:** 5.1 and above
+**Yêu cầu Premium:** phát nhạc trong trình duyệt cần Spotify Premium. Chủ ứng dụng ở Development Mode cũng cần Premium; ứng dụng mới giới hạn 5 người dùng trong allowlist. Spoty-X không cấp quyền Premium cho tài khoản Free và không sửa đổi luồng âm thanh của Spotify. Nội dung playlist trong Development Mode chỉ đọc được khi bạn sở hữu hoặc cộng tác.
 
-<h1 id="features">Features</h1>
+## Kiểm tra bằng điện thoại
 
-- **Blocks all banner, video, and audio ads** in the client
-- **Hiding podcasts, episodes, and audiobooks** from the homepage (optional)
-- **Block Spotify automatic updates** (optional)
-- **Some native experimental features have been changed**
-- **Analytics sending has been disabled** 
-- **Advanced installation [parameters](https://github.com/SpotX-Official/SpotX/discussions/60)**
+1. Mở [website](https://minhvo99.github.io/spoty-X/) bằng Chrome/Safari mới nhất.
+2. Vào **Tài khoản**. Nếu chưa có Client ID cấu hình sẵn, nhập **Client ID công khai** của ứng dụng Spotify Developer của bạn.
+3. Trong [Spotify Developer Dashboard](https://developer.spotify.com/dashboard), bật Web Playback SDK/Web API, đăng ký chính xác Redirect URI:
 
-<h1 id="installation--update">Installation / Update</h1>
-<h3>Choose installation type:</h3>
-<details>
-<summary><small>Usual installation (New theme)</small></summary><p>
-  
-  #### During installation, you need to confirm some actions, also contains:
-  
-  - New theme activated (new right and left sidebar, some cover change)
-  - All [experimental features](https://github.com/SpotX-Official/SpotX/discussions/50) included
+   ```text
+   https://minhvo99.github.io/spoty-X/
+   ```
 
-  <h4> </h4>
-  
-#### Just download and run [Install_New_theme.bat](https://raw.githack.com/amd64fox/SpotX/main/Install_New_theme.bat)
+4. Thêm tài khoản Spotify của bạn vào User Management nếu ứng dụng đang ở Development Mode.
+5. Nhấn **Đăng nhập Spotify**, cấp quyền, mở playlist và nhấn bài hát. Trình duyệt điện thoại cần thao tác nhấn để cho phép âm thanh.
+6. Nếu trình duyệt không hỗ trợ DRM hoặc chưa có thiết bị, mở Spotify, phát một bài rồi chọn **Thiết bị** trong Spoty-X.
 
-or
+Website deploy được khi chưa có Client ID, nhưng đăng nhập/phát nhạc thực tế cần hoàn thành cấu hình trên. Không nhập Client Secret hoặc mật khẩu vào Spoty-X.
 
-#### Run The following command in PowerShell:
+## Chạy mã nguồn
 
-```ps1
-iex "& { $(iwr -useb 'https://raw.githubusercontent.com/SpotX-Official/SpotX/refs/heads/main/run.ps1') } -new_theme"
+Yêu cầu Node.js 24 và npm.
+
+```bash
+npm --prefix mobile ci
+npm run web
 ```
 
-#### mirror
+Expo CLI cung cấp URL phát triển. Khi test OAuth web cục bộ, dùng IP loopback `127.0.0.1` thay `localhost`, và đăng ký đúng Redirect URI đang hiển thị trong màn hình Tài khoản, gồm cả port/path.
 
-```ps1
-iex "& { $(iwr -useb 'https://spotx-official.github.io/SpotX/run.ps1') } -m -new_theme"
+```bash
+npm start
+# Hoặc trong mobile/:
+npm run android
+npm run ios
 ```
 
-</details>
-  
+Giao diện native có thể xem qua Expo. **OAuth native cần development/production build** với scheme `spotyx://callback` đã đăng ký tại Spotify; Expo Go không phải môi trường nghiệm thu OAuth. Repo chưa cung cấp APK/IPA hoặc cấu hình ký ứng dụng. Bản native không chứa Spotify audio SDK: âm thanh được phát trên thiết bị Spotify đã chọn.
 
-<details>
-<summary><small>Usual installation (Old theme)</small></summary><p>
-  
-  #### During installation, you need to confirm some actions, also contains:
-  - Forced installation of version 1.2.13 (since the old theme was removed in subsequent versions)
-  - Old theme activated
-  - Automatic blocking of Spotify updates
-  - All [experimental features](https://github.com/SpotX-Official/SpotX/discussions/50) included
+## Kiểm thử
 
-  <h4> </h4>
-  
-#### Just download and run [Install_Old_theme.bat](https://raw.githack.com/amd64fox/SpotX/main/Install_Old_theme.bat)
+Tất cả test được chạy bằng **Vitest**. Test trình duyệt dùng Playwright làm driver bên trong Vitest.
 
-or
-
-#### Run The following command in PowerShell:
-
-```ps1
-iex "& { $(iwr -useb 'https://raw.githubusercontent.com/SpotX-Official/SpotX/refs/heads/main/run.ps1') } -v 1.2.13.661.ga588f749 -confirm_spoti_recomended_over -block_update_on"
+```bash
+npm test
+npm run typecheck
+npm run build:web
+npm --prefix mobile exec -- playwright install chromium
+npm --prefix mobile run test:e2e
+npm --prefix mobile run build:native:check
 ```
 
-#### mirror
+Test trình duyệt kiểm tra bản export thật tại đường dẫn `/spoty-X/`, trên desktop và viewport điện thoại; API/SDK Spotify được thay bằng fixture test. Chúng không xác nhận đăng nhập hay nghe nhạc với tài khoản Spotify thực. Screenshot trong `mobile/test-results/` không được commit.
 
-```ps1
-iex "& { $(iwr -useb 'https://spotx-official.github.io/SpotX/run.ps1') } -m -v 1.2.13.661.ga588f749 -confirm_spoti_recomended_over -block_update_on"
+## CI/CD và cấu hình
+
+Workflow [CI and GitHub Pages](.github/workflows/pages.yml):
+
+- PR tới `main`: npm ci, TypeScript, Vitest, export web, test trình duyệt và kiểm tra bundle iOS/Android.
+- Push `main` hoặc chạy thủ công: kiểm tra tương tự rồi deploy artifact web đã xác minh lên GitHub Pages.
+- Pull request không có quyền deploy. Deploy job chỉ có `pages: write` và `id-token: write`; build job chỉ đọc repo.
+- Pages cần chọn **GitHub Actions** làm nguồn triển khai.
+
+Cấu hình Client ID mặc định tại **Settings → Secrets and variables → Actions → Repository secrets**:
+
+| Tên | Nội dung | Bắt buộc |
+| --- | --- | --- |
+| `SPOTIFY_CLIENT_ID` | Client ID của ứng dụng Spotify Developer | Không; có thể nhập trong giao diện |
+
+Workflow đưa mã công khai này vào `EXPO_PUBLIC_SPOTIFY_CLIENT_ID` khi build web. **Client ID vẫn công khai trong website dù được quản lý bằng GitHub Secret.** Không cấu hình Client Secret, access token hoặc refresh token trong biến `EXPO_PUBLIC_*`.
+
+Nếu đã có Client ID trong tệp cục bộ, có thể lưu vào GitHub mà không đưa giá trị vào lệnh hoặc Git:
+
+```bash
+gh secret set SPOTIFY_CLIENT_ID --repo minhvo99/spoty-X < /path/to/local-client-id.txt
+gh workflow run pages.yml --repo minhvo99/spoty-X --ref main
 ```
 
-</details>
- 
-<details>
-<summary><small>Full installation</small></summary><p>
-  
-  <h4>Full installation without confirmation, what does it do?</h4> 
-  
-  - New theme activated (new right and left sidebar, some cover change)
-  - Hiding podcasts/episodes/audiobooks from the homepage
-  - Activated [static theme](https://github.com/SpotX-Official/SpotX/discussions/50#discussioncomment-4096066) <kbd>spotify</kbd> for lyrics
-  - Hiding [ad-like sections](https://github.com/SpotX-Official/SpotX/discussions/50#discussioncomment-4478943)
-  - All [experimental features](https://github.com/SpotX-Official/SpotX/discussions/50) included
-  - Removal of Spotify MS if it was found 
-  - Installation of the recommended version of Spotify (if another client has already been found, it will be installed over) 
-  - Blocking of Spotify updates
-  - After the installation is completed, the client will autorun.
-  
-<h4> </h4>
+Không có khóa Spotify thật nào được cung cấp cùng mã nguồn. `.env`, chứng thư, khóa ký và file credentials được bỏ qua bởi Git. Token web chỉ lưu trong sessionStorage của tab; native dùng Expo SecureStore. Đăng xuất xóa phiên. Đóng tab web cũng kết thúc phiên lưu trữ.
 
-#### Just download and run [Install_Auto.bat](https://raw.githack.com/amd64fox/SpotX/main/scripts/Install_Auto.bat)
+## Mã nguồn SpotX cũ
 
-or
+Repository xuất phát từ SpotX-Official/SpotX (PowerShell vá Spotify Windows). Các script/tài nguyên cũ vẫn được giữ để bảo toàn nguồn và giấy phép; chúng **không được import, chạy hoặc deploy** cùng ứng dụng React Native. Các workflow cũ được chuyển sang `docs/legacy-workflows/` để không tự thực thi. Không chạy các file `.bat`/`run.ps1` để cài ứng dụng mới.
 
-#### Run The following command in PowerShell:
+Ứng dụng mới nằm hoàn toàn trong `mobile/`. Giấy phép nguồn gốc được giữ trong `LICENSE`; license của template Expo nằm trong `mobile/LICENSE`.
 
-```ps1
-iex "& { $(iwr -useb 'https://raw.githubusercontent.com/SpotX-Official/SpotX/refs/heads/main/run.ps1') } -confirm_uninstall_ms_spoti -confirm_spoti_recomended_over -podcasts_off -block_update_on -start_spoti -new_theme -adsections_off -lyrics_stat spotify"
-```
-
-#### mirror
-
-```ps1
-iex "& { $(iwr -useb 'https://spotx-official.github.io/SpotX/run.ps1') } -m -confirm_uninstall_ms_spoti -confirm_spoti_recomended_over -podcasts_off -block_update_on -start_spoti -new_theme -adsections_off -lyrics_stat spotify"
-```
-
-</details>
-
-<details>
-<summary><small>Other types of installations</summary><p>
-
-<details>
-<summary><small>Installation for premium</small></summary><p>
-  
-  #### Usual installation only without ad blocking, for those who have a premium account, also contains:
-  
-  - New theme activated (new right and left sidebar, some cover change)
-  - Disabled only audio ads in podcasts
-  - All [experimental features](https://github.com/SpotX-Official/SpotX/discussions/50) included
-
-  <h4> </h4>
-  
-#### Just download and run [Install_Prem.bat](https://raw.githack.com/amd64fox/SpotX/main/scripts/Install_Prem.bat)
-
-or
-
-#### Run The following command in PowerShell:
-
-```ps1
-iex "& { $(iwr -useb 'https://raw.githubusercontent.com/SpotX-Official/SpotX/refs/heads/main/run.ps1') } -premium -new_theme"
-```
-
-#### mirror
-
-```ps1
-iex "& { $(iwr -useb 'https://spotx-official.github.io/SpotX/run.ps1') } -m -premium -new_theme"
-```
-
-</details>
-
-<details>
-<summary><small>Installing with parameters</small></summary><p>
-
-You can specify various parameters for a more flexible installation, more [details here](https://github.com/SpotX-Official/SpotX/discussions/60)
-
-</details>
-
-</details>
-
-<h1 id="uninstall">Uninstall</h1>
-
-- Just run [Uninstall.bat](https://raw.githack.com/amd64fox/SpotX/main/Uninstall.bat)
-
-or
-
-- Reinstall Spotify ([Full uninstall Spotify](https://github.com/amd64fox/Uninstall-Spotify) recommended)
-
-<h1 id="faq">FAQ</h1>
-
- Read [FAQ](https://telegra.ph/SpotX-FAQ-09-19)
-
-<h1 id="disclaimer">Disclaimer</h1>
-
-SpotX is a tool that modifies the official Spotify client, provided as an evaluation version — use it at your own risk.
+Tài liệu tham khảo: [PKCE](https://developer.spotify.com/documentation/web-api/tutorials/code-pkce-flow), [Web Playback SDK](https://developer.spotify.com/documentation/web-playback-sdk/tutorials/getting-started), [thay đổi API năm 2026](https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide).
